@@ -1,0 +1,16 @@
+name: 'BuildDLL'
+on:
+  push:
+    branches:
+    - 'main'
+  schedule:
+  - cron: '0 0 * * *'
+jobs:
+  BuildDLL:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: nextzlog/zylo@master
+      with:
+        token: ${{secrets.GITHUB_TOKEN}}
+        version: 2.8.3.0
+        directory: .
