@@ -130,7 +130,7 @@ func makewindow() {
 
 func init() {
 	reiwa.OnLaunchEvent = onLaunchEvent
-	reiwa.PluginName = "infoEs"
+	reiwa.PluginName = "comportlist"
 }
 
 func onLaunchEvent() {
