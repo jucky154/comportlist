@@ -2,14 +2,15 @@ package main
 
 import (
 	_ "embed"
-	"zylo/reiwa"
-	"github.com/tadvi/winc"
 	"github.com/mastrolinux/go-serial-native"
-	"strings"
-	"strconv"
+	"github.com/tadvi/winc"
 	"golang.org/x/text/encoding/japanese"
-        "golang.org/x/text/transform"
-        "io/ioutil"
+	"golang.org/x/text/transform"
+	"io/ioutil"
+	"strconv"
+	"strings"
+	"zylo/reiwa"
+	"zylo/win32"
 )
 
 const winsize = "comportlistwindow"
@@ -21,33 +22,33 @@ type ComportView struct {
 var comportview ComportView
 
 type ComportItem struct {
-	Name string
-	Description string
+	Name         string
+	Description  string
 	Manufacturer string
 }
 
-func (item  ComportItem) Text() (text []string) {
+func (item ComportItem) Text() (text []string) {
 	text = append(text, item.Name)
 	text = append(text, item.Description)
 	text = append(text, item.Manufacturer)
 	return
 }
 
-func (item  ComportItem) ImageIndex() int {
+func (item ComportItem) ImageIndex() int {
 	return 0
 }
 
-func convutf8(str string) string{
-	if len(str)==0{
+func convutf8(str string) string {
+	if len(str) == 0 {
 		return "-"
 	}
 
-        ret, err := ioutil.ReadAll(transform.NewReader(strings.NewReader(str), japanese.ShiftJIS.NewDecoder()))
-        if err != nil {
-                return "表示できない文字コードです"
-        }
+	ret, err := ioutil.ReadAll(transform.NewReader(strings.NewReader(str), japanese.ShiftJIS.NewDecoder()))
+	if err != nil {
+		return "表示できない文字コードです"
+	}
 
-        return string(ret)
+	return string(ret)
 }
 
 func comportUpdate() {
@@ -58,27 +59,27 @@ func comportUpdate() {
 	ports, err := serial.ListPorts()
 	if err != nil {
 		comportview.list.AddItem(ComportItem{
-		Name : "ポートに接続できませんでした・何もありません",
-		Description : "-",
-		Manufacturer : "-",
+			Name:         "ポートに接続できませんでした・何もありません",
+			Description:  "-",
+			Manufacturer: "-",
 		})
 		return
 	}
 
 	if len(ports) == 0 {
 		comportview.list.AddItem(ComportItem{
-		Name : "シリアルポートに何も接続がありません",
-		Description : "-",
-		Manufacturer : "-",
+			Name:         "シリアルポートに何も接続がありません",
+			Description:  "-",
+			Manufacturer: "-",
 		})
 		return
 	}
 
 	for _, info := range ports {
 		comportview.list.AddItem(ComportItem{
-		Name : convutf8(info.Name()),
-		Description : convutf8(info.Description()),
-		Manufacturer : convutf8(info.USBManufacturer()),
+			Name:         convutf8(info.Name()),
+			Description:  convutf8(info.Description()),
+			Manufacturer: convutf8(info.USBManufacturer()),
 		})
 	}
 	return
@@ -86,10 +87,9 @@ func comportUpdate() {
 
 var mainWindow *winc.Form
 
-
 func makewindow() {
 	// --- Make Window
-	mainWindow = newForm(nil)
+	mainWindow = win32.NewForm(nil)
 	x, _ := strconv.Atoi(reiwa.GetINI(winsize, "x"))
 	y, _ := strconv.Atoi(reiwa.GetINI(winsize, "y"))
 	w, _ := strconv.Atoi(reiwa.GetINI(winsize, "w"))
@@ -137,7 +137,7 @@ func onLaunchEvent() {
 	reiwa.RunDelphi(`PluginMenu.Add(op.Put(MainMenu.CreateMenuItem(), "Name", "PluginComportlistWindow"))`)
 	reiwa.RunDelphi(`op.Put(MainMenu.FindComponent("PluginComportlistWindow"), "Caption", "ComPort一覧")`)
 
-	reiwa.HandleButton("MainForm.MainMenu.PluginComportlistWindow", func(num int){
+	reiwa.HandleButton("MainForm.MainMenu.PluginComportlistWindow", func(num int) {
 		makewindow()
-	})	
+	})
 }
